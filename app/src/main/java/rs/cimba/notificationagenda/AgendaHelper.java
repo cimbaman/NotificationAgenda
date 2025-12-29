@@ -26,8 +26,8 @@ public class AgendaHelper {
 
     private static final String CHANNEL_ID = "agenda_channel";
     private static final int NOTIFICATION_ID = 1;
-
     private static int showAllDay = 1;
+    private static String nearestEvent = "No events today!";
     public static void updateNotificationAgenda(Context context) {
         List<String> events = getTodaysEvents(context);
         if (events.isEmpty()) {
@@ -53,12 +53,13 @@ public class AgendaHelper {
             inboxStyle.addLine(event);
         }
 
-        String nowTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+//        String nowTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle(nowTime + " Today's Agenda")
-                .setContentText(events.get(0))
+//                .setContentTitle(nowTime + " Today's Agenda")
+//                .setContentText(nearestEvent)
+                .setContentTitle(nearestEvent)
                 .setStyle(inboxStyle)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -78,6 +79,8 @@ public class AgendaHelper {
         long now = System.currentTimeMillis();
         long startOfDay = getStartOfDayMillis();
         long endOfDay = getEndOfDayMillis();
+
+        long minDiff = Long.MAX_VALUE;
 
         // Query Instances table
         Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
@@ -105,6 +108,15 @@ public class AgendaHelper {
                 long startMillis = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN));
                 long endMillis = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Instances.END));
                 int allDay = cursor.getInt(cursor.getColumnIndexOrThrow(CalendarContract.Instances.ALL_DAY));
+
+                long diffToStart = Math.abs(startMillis - now);
+                long diffToEnd = Math.abs(endMillis - now);
+                long currentMin = Math.min(diffToStart, diffToEnd);
+
+                if (currentMin < minDiff) {
+                    minDiff = currentMin;
+                    nearestEvent = title;
+                }
 
                 // Skip finished events
                 if (endMillis < now) continue;
