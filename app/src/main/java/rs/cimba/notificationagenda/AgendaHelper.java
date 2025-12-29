@@ -56,7 +56,7 @@ public class AgendaHelper {
 //        String nowTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notificationagenda_foreground)
+                .setSmallIcon(R.drawable.ic_notificationagenda)
 //                .setContentTitle(nowTime + " Today's Agenda")
 //                .setContentText(nearestEvent)
                 .setContentTitle(nearestEvent)
