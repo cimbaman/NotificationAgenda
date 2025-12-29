@@ -103,6 +103,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        try {
+            String version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            TextView versionText = findViewById(R.id.version_display); // Add this ID to a TextView in XML
+            versionText.setText("Version: " + version);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void checkAndRequestPermissions() {
