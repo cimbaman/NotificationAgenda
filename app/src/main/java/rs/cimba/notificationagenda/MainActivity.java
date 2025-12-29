@@ -42,6 +42,9 @@ import java.util.List;
 
 
 import android.util.Log;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,9 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
         checkAndRequestPermissions();
 
-//        createNotificationChannel();
-
         showNotificationAgenda();
+        refreshDashboardUI();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -78,6 +80,15 @@ public class MainActivity extends AppCompatActivity {
                 ExistingPeriodicWorkPolicy.UPDATE,
                 workRequest
         );
+
+        Button refreshBtn = findViewById(R.id.btn_refresh);
+
+        refreshBtn.setOnClickListener(v -> {
+            showNotificationAgenda();
+            refreshDashboardUI();
+
+            Toast.makeText(this, "Dashboard Refreshed", Toast.LENGTH_SHORT).show();
+        });
 
 
     }
@@ -155,6 +166,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void showNotificationAgenda() {
         AgendaHelper.updateNotificationAgenda(this);
+    }
+    private void refreshDashboardUI() {
+        List<String> events = AgendaHelper.getTodaysEvents(this);
+
+        TextView previewContent = findViewById(R.id.preview_content);
+        previewContent.setText(AgendaHelper.nearestEvent);
+
+        TextView fullList = findViewById(R.id.full_agenda_list);
+        StringBuilder sb = new StringBuilder();
+        for (String s : events) sb.append("• ").append(s).append("\n");
+        fullList.setText(sb.length() > 0 ? sb.toString().trim() : "No events today!");
+
     }
 
 

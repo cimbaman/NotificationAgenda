@@ -3,8 +3,10 @@ package rs.cimba.notificationagenda;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -27,7 +29,7 @@ public class AgendaHelper {
     private static final String CHANNEL_ID = "agenda_channel";
     private static final int NOTIFICATION_ID = 1;
     private static int showAllDay = 1;
-    private static String nearestEvent = "No events today!";
+    static String nearestEvent = "No events today!";
     public static void updateNotificationAgenda(Context context) {
         List<String> events = getTodaysEvents(context);
         if (events.isEmpty()) {
@@ -53,10 +55,19 @@ public class AgendaHelper {
             inboxStyle.addLine(event);
         }
 
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
 //        String nowTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notificationagenda)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(false)
 //                .setContentTitle(nowTime + " Today's Agenda")
 //                .setContentText(nearestEvent)
                 .setContentTitle(nearestEvent)
@@ -68,7 +79,7 @@ public class AgendaHelper {
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 
-    private static List<String> getTodaysEvents(Context context) {
+    static List<String> getTodaysEvents(Context context) {
         List<String> events = new ArrayList<>();
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
