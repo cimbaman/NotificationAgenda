@@ -2,46 +2,35 @@ package rs.cimba.notificationagenda;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.ContentUris;
-import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.os.Build;
-import androidx.core.app.NotificationCompat;
 
-
-import android.provider.CalendarContract;
-import android.database.Cursor;
 
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 
-import android.util.Log;
+import android.provider.Settings;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,8 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         checkAndRequestPermissions();
 
-        showNotificationAgenda();
-        refreshDashboardUI();
+        fullRefresh();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -84,10 +72,34 @@ public class MainActivity extends AppCompatActivity {
         Button refreshBtn = findViewById(R.id.btn_refresh);
 
         refreshBtn.setOnClickListener(v -> {
-            showNotificationAgenda();
-            refreshDashboardUI();
+            fullRefresh();
 
             Toast.makeText(this, "Dashboard Refreshed", Toast.LENGTH_SHORT).show();
+        });
+
+        TextView calText = findViewById(R.id.status_calendar);
+        TextView notifyText = findViewById(R.id.status_notification);
+
+        calText.setOnClickListener(v -> {
+            checkAndRequestPermissions();
+            fullRefresh();
+        });
+
+        notifyText.setOnClickListener(v -> {
+            checkAndRequestPermissions();
+            fullRefresh();
+        });
+
+        SwitchCompat allDaySwitch = findViewById(R.id.switch_all_day);
+
+        allDaySwitch.setChecked(AgendaHelper.showAllDay == 1);
+
+        // Handle Toggle Change
+        allDaySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked) AgendaHelper.showAllDay = 1;
+            else AgendaHelper.showAllDay = 0;
+
+            fullRefresh();
         });
 
 
@@ -114,42 +126,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void createNotificationChannel() {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            NotificationChannel channel = new NotificationChannel(
-//                    "agenda_channel",
-//                    "Notification Agenda",
-//                    NotificationManager.IMPORTANCE_LOW
-//            );
-//            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-//
-//            NotificationManager manager =
-//                    getSystemService(NotificationManager.class);
-//            manager.createNotificationChannel(channel);
-//        }
-//    }
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted → continue
-                checkAndRequestPermissions(); // check calendar next
-            } else {
-                // Denied → ask again politely
-                showPermissionDialog("Notification");
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // SUCCESS: Permission granted, move to the next step
+            if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
+                checkAndRequestPermissions(); // Now check for Calendar
             }
-        }
-
-        if (requestCode == REQUEST_CALENDAR_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted → continue
+        } else {
+            String name = (requestCode == REQUEST_NOTIFICATION_PERMISSION) ? "Notification" : "Calendar";
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
+                showPermissionDialog(name);
             } else {
-                // Denied → ask again politely
-                showPermissionDialog("Calendar");
+                // User just clicked deny once - you can try requesting again or show a simpler toast
+                Toast.makeText(this, name + " permission is required.", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -158,8 +150,15 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(permissionName + " Permission Needed")
                 .setMessage("This app needs " + permissionName + " permission to work properly.")
-                .setCancelable(true)
-                .setPositiveButton("Grant", (dialog, which) -> checkAndRequestPermissions())
+                .setCancelable(false)
+//                .setPositiveButton("Grant", (dialog, which) -> checkAndRequestPermissions())
+                .setPositiveButton("Settings", (dialog, which) -> {
+                    // Open App Settings so user can manually toggle it
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                })
                 .setNegativeButton("Exit", (dialog, which) -> finishAffinity())
                 .show();
     }
@@ -178,7 +177,31 @@ public class MainActivity extends AppCompatActivity {
         for (String s : events) sb.append("• ").append(s).append("\n");
         fullList.setText(sb.length() > 0 ? sb.toString().trim() : "No events today!");
 
+        TextView notifyStatus = findViewById(R.id.status_notification);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+            notifyStatus.setText("● Notification Access: Granted");
+            notifyStatus.setTextColor(Color.parseColor("#4CAF50")); // Green
+        } else {
+            notifyStatus.setText("● Notification Access: Required");
+            notifyStatus.setTextColor(Color.parseColor("#F44336")); // Red
+        }
+
+        TextView calStatus = findViewById(R.id.status_calendar);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR)
+                == PackageManager.PERMISSION_GRANTED) {
+            calStatus.setText("● Calendar Access: Granted");
+            calStatus.setTextColor(Color.parseColor("#4CAF50")); // Green
+        } else {
+            calStatus.setText("● Calendar Access: Required");
+            calStatus.setTextColor(Color.parseColor("#F44336")); // Red
+        }
     }
+
+     private void fullRefresh(){
+        showNotificationAgenda();
+        refreshDashboardUI();
+     }
 
 
 }

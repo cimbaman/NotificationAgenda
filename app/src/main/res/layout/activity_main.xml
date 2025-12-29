@@ -34,13 +34,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp">
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorSurfaceVariant"
+                    android:background="?attr/colorSurface"
                     android:orientation="vertical"
                     android:padding="20dp">
 
@@ -59,13 +58,13 @@
                         android:layout_marginTop="12dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
-
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:contentDescription="Icon"
                             android:src="@drawable/ic_notificationagenda_foreground"
-                            app:tint="?attr/colorPrimary" />
+                            app:tint="@color/white"
+                            android:background="@color/tardis"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -95,17 +94,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_refresh"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginBottom="24dp"
-                android:text="Refresh Notification"
-                app:cornerRadius="12dp"
-                app:icon="@android:drawable/ic_menu_rotate"
-                tools:ignore="HardcodedText" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -131,7 +119,64 @@
                     tools:ignore="HardcodedText" />
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_refresh"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginBottom="24dp"
+                android:text="Refresh Notification"
+                app:cornerRadius="12dp"
+                app:icon="@android:drawable/ic_menu_rotate"
+                tools:ignore="HardcodedText" />
 
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_all_day"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Include All-Day Events"
+                        app:thumbTint="?attr/colorPrimary"
+                        app:trackTint="?attr/colorSecondary"
+                        tools:ignore="HardcodedText" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="?android:attr/dividerVertical" />
+                    <TextView
+                        android:id="@+id/status_notification"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:background="?attr/selectableItemBackground"
+                        android:text="● Notifications Permission"
+                        tools:ignore="HardcodedText" />
+                    <TextView
+                        android:id="@+id/status_calendar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:background="?attr/selectableItemBackground"
+                        android:text="● Calendar Permission"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
 
         </LinearLayout>

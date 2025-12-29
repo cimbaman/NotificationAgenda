@@ -28,7 +28,7 @@ public class AgendaHelper {
 
     private static final String CHANNEL_ID = "agenda_channel";
     private static final int NOTIFICATION_ID = 1;
-    private static int showAllDay = 1;
+    static int showAllDay = 1;
     static String nearestEvent = "No events today!";
     public static void updateNotificationAgenda(Context context) {
         List<String> events = getTodaysEvents(context);
@@ -124,14 +124,14 @@ public class AgendaHelper {
                 long diffToEnd = Math.abs(endMillis - now);
                 long currentMin = Math.min(diffToStart, diffToEnd);
 
-                if (currentMin < minDiff) {
-                    minDiff = currentMin;
-                    nearestEvent = title;
-                }
 
                 // Skip finished events
                 if (endMillis < now) continue;
 
+                if (currentMin < minDiff) {
+                    minDiff = currentMin;
+                    nearestEvent = title;
+                }
 
                 if (allDay == 1 && showAllDay != 1) continue;
 
