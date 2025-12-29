@@ -128,12 +128,12 @@ public class AgendaHelper {
                 // Skip finished events
                 if (endMillis < now) continue;
 
+                if (allDay == 1 && showAllDay != 1) continue;
+
                 if (currentMin < minDiff) {
                     minDiff = currentMin;
                     nearestEvent = title;
                 }
-
-                if (allDay == 1 && showAllDay != 1) continue;
 
                 Calendar calStart = Calendar.getInstance();
                 calStart.setTimeInMillis(startMillis);
