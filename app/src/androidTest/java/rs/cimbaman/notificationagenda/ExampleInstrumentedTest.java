@@ -1,4 +1,4 @@
-package rs.cimba.notificationagenda;
+package rs.cimbaman.notificationagenda;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("rs.cimba.notificationagenda", appContext.getPackageName());
+        assertEquals("rs.cimbaman.notificationagenda", appContext.getPackageName());
     }
 }

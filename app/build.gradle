@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    namespace 'rs.cimba.notificationagenda'
+    namespace 'rs.cimbaman.notificationagenda'
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId "rs.cimba.notificationagenda"
+        applicationId "rs.cimbaman.notificationagenda"
         minSdk 26
         targetSdk 36
         versionCode 1
@@ -38,5 +38,5 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-    implementation "androidx.work:work-runtime:2.9.0"
+    implementation libs.work.runtime
 }

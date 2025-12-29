@@ -1,4 +1,4 @@
-package rs.cimba.notificationagenda;
+package rs.cimbaman.notificationagenda;
 
 import org.junit.Test;
 
