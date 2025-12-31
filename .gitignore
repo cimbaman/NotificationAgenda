@@ -4,6 +4,7 @@ gen/
 out/
 .gradle/
 build/
+app/release/
 
 # Local configuration files (contains paths to your local SDK)
 local.properties
