@@ -27,7 +27,6 @@ import androidx.work.WorkManager;
 
 import java.util.concurrent.TimeUnit;
 
-import java.util.List;
 
 
 import android.provider.Settings;
@@ -94,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
 
         allDaySwitch.setChecked(AgendaHelper.showAllDay == 1);
 
-        // Handle Toggle Change
         allDaySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(isChecked) AgendaHelper.showAllDay = 1;
             else AgendaHelper.showAllDay = 0;
@@ -121,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.POST_NOTIFICATIONS},
                         REQUEST_NOTIFICATION_PERMISSION);
-                return; // wait until permission is handled
+                return;
             }
         }
 
@@ -159,9 +157,8 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(permissionName + " Permission Needed")
                 .setMessage("This app needs " + permissionName + " permission to work properly.")
                 .setCancelable(false)
-//                .setPositiveButton("Grant", (dialog, which) -> checkAndRequestPermissions())
                 .setPositiveButton("Settings", (dialog, which) -> {
-                    // Open App Settings so user can manually toggle it
+
                     Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                     Uri uri = Uri.fromParts("package", getPackageName(), null);
                     intent.setData(uri);
@@ -175,14 +172,13 @@ public class MainActivity extends AppCompatActivity {
         AgendaHelper.updateNotificationAgenda(this);
     }
     private void refreshDashboardUI() {
-        List<String> events = AgendaHelper.getTodaysEvents(this);
 
         TextView previewContent = findViewById(R.id.preview_content);
         previewContent.setText(AgendaHelper.nearestEvent);
 
         TextView fullList = findViewById(R.id.full_agenda_list);
         StringBuilder sb = new StringBuilder();
-        for (String s : events) sb.append("• ").append(s).append("\n");
+        for (String s : AgendaHelper.events) sb.append("• ").append(s).append("\n");
         fullList.setText(sb.length() > 0 ? sb.toString().trim() : "No events today!");
 
         TextView notifyStatus = findViewById(R.id.status_notification);

@@ -27,8 +27,10 @@ public class AgendaHelper {
     private static final int NOTIFICATION_ID = 1;
     static int showAllDay = 1;
     static String nearestEvent = "No events today!";
+    static List<String> events = new ArrayList<>();
+
     public static void updateNotificationAgenda(Context context) {
-        List<String> events = getTodaysEvents(context);
+        events = getTodaysEvents(context);
         if (events.isEmpty()) {
             events.add("No events today!");
         }
@@ -59,14 +61,10 @@ public class AgendaHelper {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-//        String nowTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notificationagenda)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(false)
-//                .setContentTitle(nowTime + " Today's Agenda")
-//                .setContentText(nearestEvent)
                 .setContentTitle(nearestEvent)
                 .setStyle(inboxStyle)
                 .setOngoing(true)
@@ -90,7 +88,6 @@ public class AgendaHelper {
 
         long minDiff = Long.MAX_VALUE;
 
-        // Query Instances table
         Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
         ContentUris.appendId(builder, startOfDay);
         ContentUris.appendId(builder, endOfDay);
@@ -110,6 +107,8 @@ public class AgendaHelper {
                 CalendarContract.Instances.BEGIN + " ASC"
         );
 
+        nearestEvent = "No events today!";
+
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Instances.TITLE));
@@ -122,7 +121,6 @@ public class AgendaHelper {
                 long currentMin = Math.min(diffToStart, diffToEnd);
 
 
-                // Skip finished events
                 if (endMillis < now) continue;
 
                 if (allDay == 1 && showAllDay != 1) continue;
