@@ -12,8 +12,8 @@ android {
         applicationId "rs.cimbaman.notificationagenda"
         minSdk 26
         targetSdk 36
-        versionCode 2
-        versionName "v0.0.2"
+        versionCode 3
+        versionName 'v0.0.3'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -22,6 +22,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // This appends ".debug" to your ID (e.g. com.example.app.debug)
+            applicationIdSuffix ".debug"
+
+            // Optional: Adds a suffix to the app name so you can tell them apart on your home screen
+            versionNameSuffix "-debug"
         }
     }
     compileOptions {
